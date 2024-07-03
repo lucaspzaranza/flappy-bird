@@ -15,6 +15,7 @@ public class ScoreBoard : MonoBehaviour
     [SerializeField] private GameObject _goldMedal;
     [SerializeField] private GameObject _okButton;
     [SerializeField] private GameObject _scoreButton;
+    [SerializeField] private GameObject _medalGlows;
 
     private GameController _controller;
 
@@ -60,11 +61,31 @@ public class ScoreBoard : MonoBehaviour
 
         if(score >= 10 && score < 20)
             _simpleMedal.SetActive(true);
-        else if(score >= 20 && score < 30)
-            _bronzeMedal.SetActive(true);
-        else if (score >= 30 && score < 40)
-            _silverMedal.SetActive(true);
-        else if (score >= 40)
-            _goldMedal.SetActive(true);
+        else if(score > 10)
+        {
+            int numOfGlows = 0;
+            if(score >= 20 && score < 30)
+            {
+                _bronzeMedal.SetActive(true);
+                numOfGlows = 2;
+            }
+            else if (score >= 30 && score < 40)
+            {
+                numOfGlows = 3;
+                _silverMedal.SetActive(true);
+            }
+            else if (score >= 40)
+            {
+                numOfGlows = 4;
+                _goldMedal.SetActive(true);
+            }
+
+            _medalGlows.SetActive(true);
+            MedalGlowEffect glowEffect = _medalGlows.GetComponent<MedalGlowEffect>();
+            if (glowEffect != null)
+            {
+                glowEffect.InstantiateGlows(numOfGlows);
+            }
+        }
     }
 }

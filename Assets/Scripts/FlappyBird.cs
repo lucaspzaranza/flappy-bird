@@ -47,8 +47,8 @@ public class FlappyBird : MonoBehaviour
             int direction = _rigidBody2D.velocity.y >= 0 ? 1 : -1;
             _birdGameObject.transform.localEulerAngles += new Vector3(0f, 0f, _rotationRate * direction);
 
-            if (direction < 0 && 
-            _birdGameObject.transform.eulerAngles.z < lowerLimit && 
+            if (direction < 0 &&
+            _birdGameObject.transform.eulerAngles.z < lowerLimit &&
             _birdGameObject.transform.eulerAngles.z > _flapMaxAngle)
                 _birdGameObject.transform.localEulerAngles = new Vector3(0f, 0f, lowerLimit);
 

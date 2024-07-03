@@ -13,6 +13,8 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject _pipesPrefab;
     [SerializeField] private GameObject _inGameMenu;
     [SerializeField] private GameObject _gameOverMenu;    
+    [SerializeField] private GameObject _resetGameAnimation;    
+    [SerializeField] private GameObject _medalGlows;    
     [SerializeField] private Text _score;
     [SerializeField] private bool _gameStarted;
     [SerializeField] private int _numOfPipes;
@@ -159,5 +161,11 @@ public class GameController : MonoBehaviour
     public void ResumeGame()
     {
         Time.timeScale = 1f;
+    }
+
+    public void CallResetGame()
+    {
+        _medalGlows.SetActive(false);
+        Instantiate(_resetGameAnimation);
     }
 }
