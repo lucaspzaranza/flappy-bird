@@ -19,7 +19,7 @@ public class ResetGame : MonoBehaviour
 
     public void FadeOut()
     {
-        _fadeInOutAnimation.FadeOut();
+        _fadeInOutAnimation.FadeOutAnimation();
     }
 
     public void DestroySelf()

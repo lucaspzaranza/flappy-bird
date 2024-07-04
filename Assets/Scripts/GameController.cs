@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject _gameOverMenu;    
     [SerializeField] private GameObject _resetGameAnimation;    
     [SerializeField] private GameObject _medalGlows;    
+    [SerializeField] private GameObject _fadeInOutAnimation;    
     [SerializeField] private Text _score;
     [SerializeField] private TMP_InputField _nameInput;
     [SerializeField] private bool _gameStarted;
@@ -36,6 +37,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private LinkedList<Pipe> _pipes;
     [SerializeField] private bool _resetTopScore;
     [SerializeField] private bool _resetPlayerPrefs;
+    [SerializeField] private SoundController _soundController;
 
     [SerializeField] private int _scoreValue;
     public int ScoreValue => _scoreValue;
@@ -95,7 +97,10 @@ public class GameController : MonoBehaviour
             return;
 
         if((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && _flappyBird != null)
+        {
+            _soundController.PlayFlapAudio();
             _flappyBird.Flap();
+        }
     }
 
     private void InstantiatePipes()
@@ -114,6 +119,7 @@ public class GameController : MonoBehaviour
 
     private void Score()
     {
+        _soundController.PlayScoreAudio();
         _scoreValue++;
         _score.text = _scoreValue.ToString();
     }
@@ -138,6 +144,7 @@ public class GameController : MonoBehaviour
 
     public void GameOver()
     {
+        _soundController.PlayHitAudio();
         _gameStarted = false;
         Instantiate(_flash);
         _floorScroller.StopOffset();
@@ -219,8 +226,16 @@ public class GameController : MonoBehaviour
         print("Player Prefs successfully reseted.");
     }
 
+    public void ResetAllPlayerPrefs()
+    {
+        _soundController.PlaResetPlayerPrefsAudio();
+        ResetTopScore();
+        ResetPlayerPrefs();
+    }
+
     private void ActivateGameOverMenu()
     {
+        _soundController.PlayGameOverAudio();
         _gameOverMenu.SetActive(true);
     }
 
@@ -238,5 +253,10 @@ public class GameController : MonoBehaviour
     {
         _medalGlows.SetActive(false);
         Instantiate(_resetGameAnimation);
+    }
+
+    public void InstantiateFadeInOutAnimation()
+    {
+        Instantiate(_fadeInOutAnimation);
     }
 }
