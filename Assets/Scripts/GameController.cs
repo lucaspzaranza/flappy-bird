@@ -5,8 +5,17 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
+public static class PlayerPrefsStrings
+{
+    public const string TopScore = "TopScore";
+    public const string RankingPositionName = "RankingPositionName";
+    public const string RankingScore = "RankingScore";
+}
+
 public class GameController : MonoBehaviour
 {
+    public const int NumOfRankings = 10;
+
     [SerializeField] private FlappyBird _flappyBird;
     [SerializeField] private Scroller _floorScroller;
     [SerializeField] private GameObject _flash;
@@ -16,6 +25,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private GameObject _resetGameAnimation;    
     [SerializeField] private GameObject _medalGlows;    
     [SerializeField] private Text _score;
+    [SerializeField] private TMP_InputField _nameInput;
     [SerializeField] private bool _gameStarted;
     [SerializeField] private int _numOfPipes;
     [SerializeField] private float _pipeInitialXPosition;
@@ -25,9 +35,13 @@ public class GameController : MonoBehaviour
     [SerializeField] private float _timeToInvokeGameOverMenu;
     [SerializeField] private LinkedList<Pipe> _pipes;
     [SerializeField] private bool _resetTopScore;
+    [SerializeField] private bool _resetPlayerPrefs;
 
     [SerializeField] private int _scoreValue;
     public int ScoreValue => _scoreValue;
+
+    private string _playerName;
+    public string PlayerName => _playerName;
 
     private void OnEnable()
     {
@@ -53,6 +67,8 @@ public class GameController : MonoBehaviour
 
     public void StartGame()
     {
+        _playerName = _nameInput.text;
+
         InstantiatePipes();
         if(_flappyBird.isActiveAndEnabled)
         {
@@ -69,10 +85,16 @@ public class GameController : MonoBehaviour
             _resetTopScore = false;
         }
 
+        if (_resetPlayerPrefs)
+        {
+            ResetPlayerPrefs();
+            _resetPlayerPrefs = false;
+        }
+
         if (!_gameStarted)
             return;
 
-        if(Input.GetMouseButtonDown(0) && _flappyBird != null)
+        if((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && _flappyBird != null)
             _flappyBird.Flap();
     }
 
@@ -121,8 +143,7 @@ public class GameController : MonoBehaviour
         _floorScroller.StopOffset();
         _inGameMenu.SetActive(false);
 
-        if (_scoreValue > GetTopScore())
-            SetTopScore(_scoreValue);
+        RegisterScore();
 
         Invoke(nameof(ActivateGameOverMenu), _timeToInvokeGameOverMenu);
 
@@ -132,20 +153,70 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void RegisterScore()
+    {
+        if (_scoreValue > GetTopScore())
+            SetTopScore(_scoreValue);
+
+        bool insertedNewScore = false;
+
+        for (int i = 1; i < NumOfRankings + 1; i++)
+        {
+            string currentPlayerPrefName = PlayerPrefs.GetString($"{PlayerPrefsStrings.RankingPositionName + i}");
+            int playerScore = PlayerPrefs.GetInt($"{PlayerPrefsStrings.RankingScore + i}");
+
+            if(!insertedNewScore && _scoreValue > playerScore && !string.IsNullOrEmpty(PlayerName))
+            {
+                ReorderPlayerPrefsScores(PlayerName, _scoreValue, i);
+                i++;
+                insertedNewScore = true;
+            }
+        }
+    }
+
+    private void ReorderPlayerPrefsScores(string playerName, int score, int index)
+    {
+        for (int i = NumOfRankings + 1; i >= index; i--)
+        {
+            string previousPlayerName = PlayerPrefs.GetString($"{PlayerPrefsStrings.RankingPositionName + (i - 1)}");
+            int previousPlayerScore = PlayerPrefs.GetInt($"{PlayerPrefsStrings.RankingScore + (i - 1)}");
+
+            PlayerPrefs.SetString($"{PlayerPrefsStrings.RankingPositionName + i}", previousPlayerName);
+            PlayerPrefs.SetInt($"{PlayerPrefsStrings.RankingScore + i}", previousPlayerScore);
+
+            if(i == index)
+            {
+                PlayerPrefs.SetString($"{PlayerPrefsStrings.RankingPositionName + index}", playerName);
+                PlayerPrefs.SetInt($"{PlayerPrefsStrings.RankingScore + index}", score);
+            }
+        }
+    }
+
     public int GetTopScore()
     {
-        return PlayerPrefs.GetInt("TopScore");
+        return PlayerPrefs.GetInt(PlayerPrefsStrings.TopScore);
     }
 
     public void SetTopScore(int newVal)
     {
-        PlayerPrefs.SetInt("TopScore", newVal);
+        PlayerPrefs.SetInt(PlayerPrefsStrings.TopScore, newVal);
     }
 
     public void ResetTopScore()
     {
         SetTopScore(0);
         print("Top Score successfully reseted.");
+    }
+
+    public void ResetPlayerPrefs()
+    {
+        for (int i = 1; i < NumOfRankings + 1; i++)
+        {
+            PlayerPrefs.SetString($"{PlayerPrefsStrings.RankingPositionName + i}", string.Empty);
+            PlayerPrefs.SetInt($"{PlayerPrefsStrings.RankingScore + i}", 0);
+        }
+
+        print("Player Prefs successfully reseted.");
     }
 
     private void ActivateGameOverMenu()
