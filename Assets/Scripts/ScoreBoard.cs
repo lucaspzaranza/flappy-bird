@@ -25,6 +25,11 @@ public class ScoreBoard : MonoBehaviour
             _controller = FindObjectOfType<GameController>();
     }
 
+    public void CallScoreIncrement()
+    {
+        StartCoroutine(ActivateScoreIncrementAnimation());
+    }
+
     public IEnumerator ActivateScoreIncrementAnimation()
     {
         if (_controller == null)
@@ -32,18 +37,16 @@ public class ScoreBoard : MonoBehaviour
 
         int topScore = _controller.GetTopScore();
         _topScore.text = topScore.ToString();
+
+        if(_controller.ScoreValue == topScore)
+        {
+            _newTopScore.SetActive(true);
+        }
+
         for (int i = 0; i <= _controller.ScoreValue; i++)
         {
             yield return new WaitForSeconds(_interval);
-
             _score.text = i.ToString();
-
-            if(i > topScore)
-            {
-                _topScore.text = _score.text;
-                _newTopScore.SetActive(true);
-                _controller.SetTopScore(i);
-            }
         }
 
         _okButton.SetActive(true);
